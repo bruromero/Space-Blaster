@@ -167,6 +167,9 @@ public class GameController {
         } catch (Exception e) {
             System.err.println("Error loading images: " + e.getMessage());
         }
+
+        com.spaceblaster.util.SoundManager.loadSound("shoot", "shoot.wav");
+        com.spaceblaster.util.SoundManager.loadSound("explosion", "explosion.wav");
     }
     
     /**
@@ -355,6 +358,9 @@ public class GameController {
             Bullet bullet = new Bullet(player.getX() + player.getWidth() / 2 - 2,
                     player.getY() - 10, true);
             gameState.addBullet(bullet);
+
+            com.spaceblaster.util.SoundManager.play("shoot");
+            
             lastShotTime = now;
         }
     }
@@ -378,6 +384,8 @@ public class GameController {
                         astIt.remove();
                         gameState.addScore(asteroid.getPoints());
                         maybeSpawnPowerUp(asteroid.getX(), asteroid.getY());
+
+                        com.spaceblaster.util.SoundManager.play("explosion");
                         break;
                     }
                 }
@@ -390,6 +398,8 @@ public class GameController {
                         enemyIt.remove();
                         gameState.addScore(enemy.getPoints());
                         maybeSpawnPowerUp(enemy.getX(), enemy.getY());
+
+                        com.spaceblaster.util.SoundManager.play("explosion");
                         break;
                     }
                 }
@@ -401,6 +411,9 @@ public class GameController {
                     bulletIt.remove();
                     boss.hit();
                     gameState.addScore(50);
+
+                    com.spaceblaster.util.SoundManager.play("explosion");
+                    
                     if (boss.isDefeated()) {
                         gameState.addScore(1000);
                         gameState.setBossDefeated(true);
@@ -415,6 +428,9 @@ public class GameController {
             if (player.getBounds().intersects(asteroid.getBounds().getBoundsInParent())) {
                 player.hit();
                 it.remove();
+
+                com.spaceblaster.util.SoundManager.play("explosion");
+                
                 if (player.getLives() <= 0) {
                     gameState.setGameRunning(false);
                 }
@@ -429,6 +445,9 @@ public class GameController {
                     && player.getBounds().intersects(bullet.getBounds().getBoundsInParent())) {
                 player.hit();
                 it.remove();
+
+                com.spaceblaster.util.SoundManager.play("explosion");
+                
                 if (player.getLives() <= 0) {
                     gameState.setGameRunning(false);
                 }
