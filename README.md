@@ -787,88 +787,84 @@ Below are the actual validation outcomes, verification statuses, and technical e
 
 ---
 
-6. Build Procedures
-Prerequisites
-Install Java 17 or higher (Ubuntu/Debian):
+## 6. Build Procedures
 
-bash
-sudo apt update
-sudo apt install openjdk-17-jdk
-java -version
-Install JavaFX:
+* **Prerequisites**
+* **Install Java 17 or higher (Ubuntu/Debian):**
+`sudo apt update`
+`sudo apt install openjdk-17-jdk`
+`java -version`
 
-bash
-sudo apt install openjfx
-Install Maven (optional but recommended):
+* **Install JavaFX:**
+`sudo apt install openjfx`
 
-bash
-sudo apt install maven
-Clone and Build
-bash
-# Clone the repository
-git clone https://github.com/Dani-ela-git/SpaceBlasterGame.git
+* **Install Maven (optional but recommended):**
+`sudo apt install maven`
 
-# Navigate to project directory
-cd SpaceBlasterGame/SpaceBlasterJavaFX
+**Clone and Build**
 
-# Build with Maven
-mvn clean compile
+* **Clone the repository**<
+`git clone https://github.com/bruromero/Space-Blaster.git`
 
-# Run the game
-mvn javafx:run
-Alternative: Run without Maven
-bash
-# Set JavaFX path
-JAVAFX_PATH="/usr/share/openjfx/lib"
+* **Go to the project folder**
+`cd Space-Blaster/SpaceBlasterJavaFX`
 
-# Compile
-javac --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml,javafx.media -d bin $(find src -name "*.java")
+* **Build the files**
+`mvn clean compile`
 
-# Run
-java --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml,javafx.media -cp bin com.spaceblaster.Main
-Image Assets
+* **Run the game!**
+`mvn javafx:run`
+
+---
+**Alternative: Run without Maven**
+
+* **Set JavaFX path**
+`JAVAFX_PATH="/usr/share/openjfx/lib"`
+
+* **Compile**
+`javac --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml,javafx.media -d bin $(find src -name "*.java")`
+
+* **Run**
+`java --module-path $JAVAFX_PATH --add-modules javafx.controls,javafx.fxml,javafx.media -cp bin com.spaceblaster.Main`
+
+* **Image Assets**
 The game uses sprites from the Space Shooter Redux asset pack. Images are located at:
 
 text
-src/main/resourses/images/
+`src/main/resourses/images/`
 
+---
+## 7. Problems
 
-## ⚠️ Problems & Learning Challenges
+## ⚠️ Challenges & Lessons Learned
 
-Developing Space Blaster introduced several software engineering hurdles, forcing the team to balance framework-specific mechanics with clean, non-verbose, and highly cohesive object-oriented design.
+Developing **Space Blaster** was a great learning experience. We had to face some tricky coding hurdles to keep the game running smoothly while making sure the code stayed clean and organized.
 
-### 1. The Verbosity vs. Cohesion Dilemma (Refactoring the Game Loop)
-* **The Challenge:** Initially, the `GameController` was becoming a monolithic, highly verbose class because it was handling input tracking, entity lifecycles, and physics equations all in one place. This architectural bloat violated the Single Responsibility Principle (SRP).
-* **The Resolution:** To enforce strict code cohesion and eliminate verbosity, we refactored the structural core by moving all data arrays, score updates, and state flags into a dedicated `GameState` model. This split drastically reduced repetitive boilerplate code inside the execution loop, keeping classes short, readable, and highly focused on their primary objectives.
+### 1. Cleaning Up the Monolithic Game Loop
+* **The Problem:** At first, our `GameController` class was doing way too much—handling user inputs, spawning enemies, moving items, and tracking scores all at the same time. The code became huge and messy.
+* **The Solution:** We moved all data arrays, score tracking, and game status flags into a separate, dedicated `GameState` model. This split made the main game loop short, readable, and easy to maintain.
 
-### 2. Overcoming the Verbosity of JavaFX Layout Setup
-* **The Challenge:** Building UI menus programmatically in JavaFX can quickly become overly verbose due to the extensive setup required for styling, alignment, and hover effects on every single node element.
-* **The Resolution:** We minimized inline layout boilerplate by nesting elements inside structured wrapper groups (like `VBox`) and leveraging iterative lambda listeners (`setOnMouseEntered` / `setOnMouseExited`) for UI animations. This approach kept the presentation layer clean and maintainable.
+### 2. Cutting Down JavaFX UI Boilerplate
+* **The Problem:** Creating buttons and menus purely through Java code can make the file extremely long due to repetitive layout, alignment, and hover-effect settings for every single button.
+* **The Solution:** We organized elements using structured layout containers (like `VBox`) and used smart lambda loops to apply hover animations (`setOnMouseEntered` / `setOnMouseExited`) to all buttons at once.
 
-### 3. Managing Asynchronous States and Runtime Concurrency
-* **The Challenge:** Adapting to the architectural transition between JavaFX’s application thread and our custom physics loops presented a steep learning curve. Managing real-time entity spawning while concurrently checking geometric intersections frequently threw `ConcurrentModificationException` faults.
-* **The Resolution:** Learning how to decouple immediate array mutation from the active loop path was one of our greatest breakthroughs. We resolved this by implementing intermediate thread-safe queue pipelines (`ConcurrentLinkedQueue`), which successfully eliminated race conditions without adding blocking locks.
+### 3. Fixing Game Crashes (`ConcurrentModificationException`)
+* **The Problem:** In a real-time game, enemies are constantly spawning while the physics engine is looping to check for hits. Trying to add or remove items from a list while looping through it caused frequent game crashes.
+* **The Solution:** We stopped changing the game lists directly inside the loop. Instead, we used a thread-safe queue (`ConcurrentLinkedQueue`) to buffer items, letting them wait safely to be added or removed on the next game tick.
 
-### 4. Mathematical Mapping & Boundary Constraints
-* **The Challenge:** Translating abstract, continuous algebraic formulas (like dynamic velocity matrices based on level scaling) into real-time, discrete pixel constraints on a finite $1024 \times 768$ canvas viewport was a non-trivial physics challenge.
-* **The Resolution:** We modularized our spatial validation logic by encapsulating safe coordinate clamping structures inside individual entity behaviors (such as `Player` movement boundaries), preventing rendering bugs or off-screen out-of-bounds escapes.
+### 4. Keeping Ships Inside the Screen
+* **The Problem:** Calculating dynamic speeds based on the current level while making sure player ships and asteroids didn't fly off or disappear past the $1024 \times 768$ screen limits was a bit tricky.
+* **The Solution:** We added simple position-clamping boundaries directly inside each object's logic (like `Player.java`), keeping everyone safely inside the playable viewport.
 
-## 🌟 Advantages of Using JavaFX for Space Blaster
+---
+## 8. Comments
 
-Choosing **JavaFX** as the primary graphics and GUI library provided several engineering advantages that directly benefited the development, performance, and architecture of Space Blaster:
+## 🌟 Why We Chose JavaFX
 
-### 1. Hardware-Accelerated Graphics Pipeline
-JavaFX utilizes a modern pipeline that leverages hardware acceleration (via DirectX on Windows and OpenGL on Linux/Mac). This built-in acceleration ensures that rendering standard shapes, text, and texturized sprites through the `GraphicsContext` onto a high-performance `Canvas` remains fluid, consistently hitting a stable 60 FPS update cycle without taxing the CPU.
+Using **JavaFX** as our main graphics engine brought some huge advantages to the table:
 
-### 2. High-Performance Animation Core (`AnimationTimer`)
-Instead of relying on standard Java utility threads (`java.util.Timer`) or swing timers—which can cause stuttering and thread collision—JavaFX provides the native `AnimationTimer` abstraction layer. This timer synchronizes game loop ticks directly with the physical monitor's vertical refresh rate (V-Sync), eliminating screen tearing and delivering precise kinematics updates.
-
-### 3. Native Event Filtering for Seamless Inputs
-The event handling system in JavaFX (`setOnKeyPressed` / `setOnKeyReleased`) communicates closely with system-level window drivers. This allows the game to collect and route hardware keyboard signals asynchronously into safe operational lookup collections (`Set<KeyCode>`), decoupling continuous ship steering and firing mechanics from repetitive OS key-repeat delays.
-
-### 4. Built-in Layout Wrappers and Visual Effects
-Building a cohesive user interface manually can lead to extreme boilerplate. JavaFX significantly reduces programmatic verbosity by providing structured layout containers (like `VBox` and `StackPane`) and native component property nodes. Properties like node opacity filters smoothly manage temporary alpha rendering during player invincibility windows without requiring custom bitmap manipulation formulas.
-
-### 5. Seamless Cross-Platform Portability
-Because JavaFX isolates desktop platform dependencies, the entire rendering loop, local directory disk persistence, and audio subsystems run natively across Windows, Linux, and macOS environments without requiring platform-specific graphics code or custom wrapper adjustments.
-
+* **Hardware Acceleration:** JavaFX uses your computer's graphics card (DirectX/OpenGL) automatically. This keeps the game rendering at a rock-solid **60 FPS** without slowing down your CPU.
+* **Smooth Animation Core (`AnimationTimer`):** Instead of using unreliable background timers that cause micro-stutters, the native `AnimationTimer` syncs the game's movement ticks directly with your monitor's refresh rate (V-Sync).
+* **Responsive Keyboard Controls:** Key inputs are captured asynchronously and saved into a local `Set<KeyCode>` collection. This eliminates typical operating system keyboard delays, making ship steering and shooting feel instant.
+* **Easy Visual Effects & UI:** Containers like `VBox` and `StackPane` made layout design very straightforward. We were also able to easily apply visual transparency (alpha changes) to indicate player invincibility without doing complex image processing.
+* **Run Anywhere Portability:** The exact same code for the game window, graphics rendering, local file saving, and audio runs perfectly across Windows, Linux, and macOS without requiring a single tweak.
